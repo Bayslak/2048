@@ -13,7 +13,8 @@ public partial class Board : Node2D
     private int _rows = 4, _columns = 4;
     private Vector2 _cellSize;
 
-    private readonly Dictionary<CellPosition, Cell> _cells = [];
+    private readonly Dictionary<CellPosition, Cell> _backgroundCells = new Dictionary<CellPosition, Cell>();
+    private readonly Dictionary<CellPosition, Cell> _playingCells = new Dictionary<CellPosition, Cell>();
 
     private float _timeBetweenSpawns = 0.08f;
     public event Action StartingAnimationFinished;
@@ -63,7 +64,7 @@ public partial class Board : Node2D
                 cell.Position += new Vector2(_cellSize.X * i, 0);
                 cell.Position -= new Vector2(0, _cellSize.Y * y);
                 
-                _cells.Add(cellPosition, cell);
+                _backgroundCells.Add(cellPosition, cell);
 
                 cell.Initialize();
             }
@@ -72,10 +73,10 @@ public partial class Board : Node2D
 
     public void AnimateStart()
     {
-        var cells = _cells.Values.ToList();
+        var cells = _backgroundCells.Values.ToList();
         for (int i = 0; i < cells.Count; i++)
         {
-            cells[i].AnimateStart(i * _timeBetweenSpawns);
+            cells[i].AnimateStart();
         }
         
         StartingAnimationFinished?.Invoke();
@@ -95,7 +96,20 @@ public partial class Board : Node2D
 
     private void SpawnNumber(CellPosition cellPosition, int value)
     {
-        var cell =  _cells[cellPosition];
+        var cell = _cellScene.Instantiate<Cell>();
+        cell.Name = _playingCells.Values.Count + 1 + "_cell";
+        AddChild(cell);
+        
+        cell.Position = _backgroundCells[cellPosition].Position;
+        cell.Initialize();
+        
         cell.SetValue(value);
+        cell.AnimateStart();
+    }
+
+    public void Move(MoveDirection moveDirection)
+    {
+        var cellsToMove = _playingCells.Values.ToList().Where(c => !c.Empty).ToList();
+        GD.Print($"I can move {cellsToMove.Count} cells");
     }
 }

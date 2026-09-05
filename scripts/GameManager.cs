@@ -31,8 +31,33 @@ public partial class GameManager : Node2D
             
             _board.AnimateStart();
         }
+
+        if (_waitingToStart)
+            return;
+
+        HandleMovements();
     }
-    
+
+    private void HandleMovements()
+    {
+        if (Input.IsActionJustPressed("left"))
+        {
+            _board.Move(MoveDirection.Left);
+        } 
+        else if (Input.IsActionJustPressed("right"))
+        {
+            _board.Move(MoveDirection.Right);
+        }
+        else if (Input.IsActionJustPressed("up"))
+        {
+            _board.Move(MoveDirection.Up);
+        }
+        else if (Input.IsActionJustPressed("down"))
+        {
+            _board.Move(MoveDirection.Down);
+        }
+    }
+
     private void HandleStartingAnimationFinished()
     {
         StartGame();
@@ -42,4 +67,12 @@ public partial class GameManager : Node2D
     {
         _board.SpawnStartingNumbers(2, 2);
     }
+}
+
+public enum MoveDirection
+{
+    Up,
+    Down,
+    Left,
+    Right
 }
