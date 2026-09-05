@@ -1,3 +1,4 @@
+using System;
 using Godot;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,7 @@ public partial class Board : Node2D
     private readonly Dictionary<CellPosition, Cell> _cells = [];
 
     private float _timeBetweenSpawns = 0.08f;
+    public event Action StartingAnimationFinished;
 
     public override void _Ready()
     {
@@ -75,5 +77,25 @@ public partial class Board : Node2D
         {
             cells[i].AnimateStart(i * _timeBetweenSpawns);
         }
+        
+        StartingAnimationFinished?.Invoke();
+    }
+
+    public void SpawnStartingNumbers(int howMany, int value)
+    {
+        var random = new Random();
+        for (int i = 0; i < howMany; i++)
+        {
+            var randomRow = random.Next(_rows);
+            var randomColumn = random.Next(_columns);
+            
+            SpawnNumber(new CellPosition(randomRow, randomColumn), value);
+        }
+    }
+
+    private void SpawnNumber(CellPosition cellPosition, int value)
+    {
+        var cell =  _cells[cellPosition];
+        cell.SetValue(value);
     }
 }

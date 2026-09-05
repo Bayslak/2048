@@ -32,6 +32,12 @@ public partial class Cell : Node2D
         var tween = GetTree().CreateTween();
         tween.TweenProperty(this, "scale", _startingScale, 0.2f).SetDelay(delay);
     }
+
+    public void SetValue(int value)
+    {
+        _label.Text = value.ToString();
+        _sprite.SelfModulate = CellConstants.NUMBERS_TO_COLORS[value];
+    }
 }
 
 public record CellPosition(int Row, int Column);

@@ -11,6 +11,13 @@ public partial class GameManager : Node2D
     {
         _startLabel = GetParent().GetNode<Label>("start_label");
         _board = GetParent().GetNode<Board>("board");
+
+        _board.StartingAnimationFinished += HandleStartingAnimationFinished;
+    }
+
+    public override void _ExitTree()
+    {
+        _board.StartingAnimationFinished -= HandleStartingAnimationFinished;
     }
 
     public override void _Process(double delta)
@@ -24,5 +31,15 @@ public partial class GameManager : Node2D
             
             _board.AnimateStart();
         }
+    }
+    
+    private void HandleStartingAnimationFinished()
+    {
+        StartGame();
+    }
+
+    private void StartGame()
+    {
+        _board.SpawnStartingNumbers(2, 2);
     }
 }
