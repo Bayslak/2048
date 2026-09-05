@@ -14,10 +14,11 @@ public partial class Board : Node2D
     private Vector2 _cellSize;
 
     private readonly Dictionary<CellPosition, Cell> _backgroundCells = new Dictionary<CellPosition, Cell>();
-    private readonly Dictionary<CellPosition, Cell> _playingCells = new Dictionary<CellPosition, Cell>();
+    private Dictionary<CellPosition, Cell> _playingCells = new Dictionary<CellPosition, Cell>();
 
     private float _timeBetweenSpawns = 0.08f;
     public event Action StartingAnimationFinished;
+    public bool IsMoving = false;
 
     public override void _Ready()
     {
@@ -57,7 +58,7 @@ public partial class Board : Node2D
                 var cell = _cellScene.Instantiate<Cell>();
                 cell.Name = i + "_" + y;
 
-                var cellPosition = new CellPosition(i, y);
+                var cellPosition = new CellPosition(y, i);
                 AddChild(cell);
 
                 cell.Position = startingPosition;
@@ -105,11 +106,164 @@ public partial class Board : Node2D
         
         cell.SetValue(value);
         cell.AnimateStart();
+        
+        _playingCells.Add(cellPosition, cell);
     }
 
     public void Move(MoveDirection moveDirection)
     {
-        var cellsToMove = _playingCells.Values.ToList().Where(c => !c.Empty).ToList();
-        GD.Print($"I can move {cellsToMove.Count} cells");
+        IsMoving = true;
+        
+        var cellsToMove = _playingCells.Where(c => !c.Value.Empty).ToList();
+        
+        // i need to understand next position for each cell that can move, if they can move
+        var result = CalculatePossibleMoves(moveDirection, cellsToMove);
+
+        foreach (var cell in result)
+        {
+            var tween = GetTree().CreateTween();
+            tween.TweenProperty(cell.Value, "position", _backgroundCells[cell.Key].Position, 0.1f);
+        }
+
+        _playingCells = result;
+
+        IsMoving = false;
+    }
+
+    private Dictionary<CellPosition, Cell> CalculatePossibleMoves(MoveDirection moveDirection, List<KeyValuePair<CellPosition, Cell>> cellsToMove)
+    {
+        var result = new Dictionary<CellPosition, Cell>();
+
+        switch (moveDirection)
+        {
+            case MoveDirection.Up:
+                var orderByDescendingRow = cellsToMove.OrderByDescending(kvp => kvp.Key.Row);
+                foreach (var cell in orderByDescendingRow)
+                {
+                    if (cell.Key.Row > 2)
+                    {
+                        result.Add(cell.Key, cell.Value);
+                        continue;
+                    }
+
+                    for (int i = cell.Key.Row + 1; i < _rows; i++)
+                    {
+                        _playingCells.TryGetValue(new CellPosition(i, cell.Key.Column), out var value);
+
+                        if (value is { Empty: false })
+                        {
+                            result.Add(new CellPosition(i - 1, cell.Key.Column), cell.Value);
+                            _playingCells.Remove(cell.Key);
+                            _playingCells.Add(new CellPosition(i - 1, cell.Key.Column), cell.Value);
+                            break;
+                        }
+
+                        if (i == _rows - 1)
+                        {
+                            result.Add(new CellPosition(i, cell.Key.Column), cell.Value);
+                            _playingCells.Remove(cell.Key);
+                            _playingCells.Add(new CellPosition(i, cell.Key.Column), cell.Value);
+                        }
+                    }
+                }
+                break;
+            case MoveDirection.Down:
+                var orderedByAscendingRow = cellsToMove.OrderBy(kvp => kvp.Key.Row);
+                foreach (var cell in orderedByAscendingRow)
+                {
+                    if (cell.Key.Row < 1)
+                    {
+                        result.Add(cell.Key, cell.Value);
+                        continue;
+                    }
+
+                    for (int i = cell.Key.Row - 1; i >= 0; i--)
+                    {
+                        _playingCells.TryGetValue(new CellPosition(i, cell.Key.Column), out var value);
+
+                        if (value is { Empty: false })
+                        {
+                            result.Add(new CellPosition(i + 1, cell.Key.Column), cell.Value);
+                            _playingCells.Remove(cell.Key);
+                            _playingCells.Add(new CellPosition(i + 1, cell.Key.Column), cell.Value);
+                            break;
+                        }
+
+                        if (i == 0)
+                        {
+                            result.Add(new CellPosition(i, cell.Key.Column), cell.Value);
+                            _playingCells.Remove(cell.Key);
+                            _playingCells.Add(new CellPosition(i, cell.Key.Column), cell.Value);
+                        }
+                    }
+                }
+                break;
+            case MoveDirection.Left:
+                var orderedByAscendingColumn = cellsToMove.OrderBy(kvp => kvp.Key.Column);
+                foreach (var cell in orderedByAscendingColumn)
+                {
+                    if (cell.Key.Column < 1)
+                    {
+                        result.Add(cell.Key, cell.Value);
+                        continue;
+                    }
+
+                    for (int i = cell.Key.Column - 1; i >= 0; i--)
+                    {
+                        _playingCells.TryGetValue(new CellPosition(cell.Key.Row, i), out var value);
+
+                        if (value is { Empty: false })
+                        {
+                            result.Add(new CellPosition(cell.Key.Row, i + 1), cell.Value);
+                            _playingCells.Remove(cell.Key);
+                            _playingCells.Add(new CellPosition(cell.Key.Row, i + 1), cell.Value);
+                            break;
+                        }
+
+                        if (i == 0)
+                        {
+                            result.Add(new CellPosition(cell.Key.Row, i), cell.Value);
+                            _playingCells.Remove(cell.Key);
+                            _playingCells.Add(new CellPosition(cell.Key.Row, i), cell.Value);
+                        }
+                    }
+                }
+                break;
+            case MoveDirection.Right:
+                var orderedByDescendingColumn = cellsToMove.OrderByDescending(kvp => kvp.Key.Column);
+                foreach (var cell in orderedByDescendingColumn)
+                {
+                    if (cell.Key.Column > 2)
+                    {
+                        result.Add(cell.Key, cell.Value);
+                        continue;
+                    }
+
+                    for (int i = cell.Key.Column + 1; i < _columns; i++)
+                    {
+                        _playingCells.TryGetValue(new CellPosition(cell.Key.Row, i), out var value);
+
+                        if (value is { Empty: false })
+                        {
+                            _playingCells.Remove(cell.Key);
+                            result.Add(new CellPosition(cell.Key.Row, i - 1), cell.Value);
+                            _playingCells.Add(new CellPosition(cell.Key.Row, i - 1), cell.Value);
+                            break;
+                        }
+
+                        if (i == _columns - 1)
+                        {
+                            result.Add(new CellPosition(cell.Key.Row, i), cell.Value);
+                            _playingCells.Remove(cell.Key);
+                            _playingCells.Add(new CellPosition(cell.Key.Row, i), cell.Value);
+                        }
+                    }
+                }
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(moveDirection), moveDirection, null);
+        }
+        
+        return result;
     }
 }

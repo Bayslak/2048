@@ -35,7 +35,8 @@ public partial class GameManager : Node2D
         if (_waitingToStart)
             return;
 
-        HandleMovements();
+        if(!_board.IsMoving)
+            HandleMovements();
     }
 
     private void HandleMovements()
