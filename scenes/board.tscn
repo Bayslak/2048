@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://1fqavu3510m4"]
+
+[ext_resource type="Texture2D" uid="uid://dt3h6ktku4bsq" path="res://assets/board.png" id="1_bw3vb"]
+[ext_resource type="Script" uid="uid://byvmrem4wum5t" path="res://scripts/Board.cs" id="1_tx6nw"]
+[ext_resource type="PackedScene" uid="uid://bynkryaiprs4u" path="res://scenes/cell.tscn" id="2_nglv8"]
+
+[node name="board" type="Node2D" unique_id=928387428]
+script = ExtResource("1_tx6nw")
+_cellScene = ExtResource("2_nglv8")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=656267256]
+texture = ExtResource("1_bw3vb")

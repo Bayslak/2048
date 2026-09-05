@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://bynkryaiprs4u"]
+
+[ext_resource type="Script" uid="uid://b48yq7ditub8y" path="res://scripts/Cell.cs" id="1_0s7o3"]
+[ext_resource type="Texture2D" uid="uid://cvfxqjuix5dxt" path="res://assets/cell.png" id="1_upbjj"]
+
+[node name="cell" type="Node2D" unique_id=1614620362]
+script = ExtResource("1_0s7o3")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1863863001]
+texture = ExtResource("1_upbjj")
+
+[node name="Label" type="Label" parent="." unique_id=1505931758]
+offset_left = -14.0
+offset_top = -14.0
+offset_right = 14.0
+offset_bottom = 14.0
+theme_override_colors/font_color = Color(0.14767182, 0.14767179, 0.14767179, 1)
+theme_override_font_sizes/font_size = 14
+text = "2"
+horizontal_alignment = 1
+vertical_alignment = 1
