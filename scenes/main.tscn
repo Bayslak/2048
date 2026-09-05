@@ -1,8 +1,22 @@
 [gd_scene format=3 uid="uid://bqx4oqqnrxsrk"]
 
+[ext_resource type="Script" uid="uid://b2gc7at1nuqst" path="res://scripts/GameManager.cs" id="1_0wfyh"]
 [ext_resource type="PackedScene" uid="uid://1fqavu3510m4" path="res://scenes/board.tscn" id="1_o5qli"]
 
 [node name="main" type="Node2D" unique_id=360927433]
 
+[node name="game_manager" type="Node2D" parent="." unique_id=24624615]
+script = ExtResource("1_0wfyh")
+
 [node name="board" parent="." unique_id=928387428 instance=ExtResource("1_o5qli")]
 position = Vector2(182, 87)
+
+[node name="start_label" type="Label" parent="." unique_id=1956822315]
+offset_left = 122.0
+offset_top = 77.0
+offset_right = 243.0
+offset_bottom = 100.0
+theme_override_font_sizes/font_size = 10
+text = "Start by pressing enter"
+horizontal_alignment = 1
+vertical_alignment = 1

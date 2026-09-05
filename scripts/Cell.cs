@@ -7,22 +7,30 @@ public partial class Cell : Node2D
     [Export] private Label _label;
 
     [Export] private bool _empty = true;
+    private Vector2 _startingScale;
     
     public override void _Ready()
     {
         _sprite =  GetNode<Sprite2D>("Sprite2D");
         _label = GetNode<Label>("Label");
 
-        Initialize();
+        _startingScale = this.Scale;
     }
 
-    private void Initialize()
+    public void Initialize()
     {
-        if (!_empty)
-            return;
-        
         _label.Text = string.Empty;
         _sprite.SelfModulate = CellConstants.EMPTY;
+
+        this.Visible = false;
+        this.Scale = Vector2.Zero;
+    }
+
+    public void AnimateStart(float delay)
+    {
+        this.Visible = true;
+        var tween = GetTree().CreateTween();
+        tween.TweenProperty(this, "scale", _startingScale, 0.2f).SetDelay(delay);
     }
 }
 

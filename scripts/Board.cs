@@ -1,6 +1,6 @@
 using Godot;
-using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public partial class Board : Node2D
 {
@@ -14,6 +14,8 @@ public partial class Board : Node2D
 
     private readonly Dictionary<CellPosition, Cell> _cells = [];
 
+    private float _timeBetweenSpawns = 0.08f;
+
     public override void _Ready()
     {
         if (_cellScene == null)
@@ -22,8 +24,6 @@ public partial class Board : Node2D
         _sprite = GetNode<Sprite2D>("Sprite2D");
         
         Initialize();
-        
-        GD.Print("All good.");
     }
 
     private void DetermineBoardSize()
@@ -34,7 +34,7 @@ public partial class Board : Node2D
         _boardHeight = size.Y;
     }
 
-    private void Initialize()
+    public void Initialize()
     {
         DetermineBoardSize();
         
@@ -62,7 +62,18 @@ public partial class Board : Node2D
                 cell.Position -= new Vector2(0, _cellSize.Y * y);
                 
                 _cells.Add(cellPosition, cell);
+
+                cell.Initialize();
             }
+        }
+    }
+
+    public void AnimateStart()
+    {
+        var cells = _cells.Values.ToList();
+        for (int i = 0; i < cells.Count; i++)
+        {
+            cells[i].AnimateStart(i * _timeBetweenSpawns);
         }
     }
 }
