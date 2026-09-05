@@ -3,6 +3,9 @@
 [ext_resource type="Script" uid="uid://b48yq7ditub8y" path="res://scripts/Cell.cs" id="1_0s7o3"]
 [ext_resource type="Texture2D" uid="uid://cvfxqjuix5dxt" path="res://assets/cell.png" id="1_upbjj"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0s7o3"]
+size = Vector2(28, 28)
+
 [node name="cell" type="Node2D" unique_id=1614620362]
 script = ExtResource("1_0s7o3")
 
@@ -19,3 +22,8 @@ theme_override_font_sizes/font_size = 14
 text = "2"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="Area2D" type="Area2D" parent="." unique_id=110640318]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=58941079]
+shape = SubResource("RectangleShape2D_0s7o3")
