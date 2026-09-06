@@ -18,7 +18,7 @@ public partial class Board : Node2D
 
     private float _timeBetweenSpawns = 0.08f;
     public event Action StartingAnimationFinished;
-    public event Action MovingAnimationFinished;
+    public event Action<int> MovingAnimationFinished;
     public event Action GameWon;
     public event Action GameLost;
 
@@ -32,17 +32,21 @@ public partial class Board : Node2D
         Initialize();
     }
 
-    private void DetermineBoardSize()
+    private Vector2 DetermineBoardSize()
     {
         var size = _sprite.GetRect().Size;
 
         _boardWidth = size.X;
         _boardHeight = size.Y;
+
+        return size;
     }
 
     public void Initialize()
     {
-        DetermineBoardSize();
+        _ = DetermineBoardSize();
+        var viewportCenter = GetViewportRect().Size / 2f;
+        this.Position = new Vector2(viewportCenter.X / 1.8f, viewportCenter.Y);
         
         _cellSize = new Vector2((float)_boardWidth / _columns, (float)_boardHeight / _rows);
         var startingPosition = new Vector2(-((float)_boardWidth / 2) + _cellSize.X / 2,
@@ -126,22 +130,21 @@ public partial class Board : Node2D
         
         var cellsToMove = _playingCells.Where(c => !c.Value.Empty).ToList();
         
-        // i need to understand next position for each cell that can move, if they can move
-        var result = CalculatePossibleMoves(moveDirection, cellsToMove);
+        var result = CalculateMoves(moveDirection, cellsToMove);
 
-        if (result.Count == 0 || !cellsBefore.Except(result).Any())
+        if (result.newPositions.Count == 0 || !cellsBefore.Except(result.newPositions).Any())
             return false;
 
         Tween lastTween = null;
-        foreach (var cell in result)
+        foreach (var cell in result.newPositions)
         {
             var tween = GetTree().CreateTween();
             tween.TweenProperty(cell.Value, "position", _backgroundCells[cell.Key].Position, 0.1f);
             lastTween = tween;
         }
 
-        _playingCells = result;
-        lastTween!.Finished += () => MovingAnimationFinished?.Invoke();
+        _playingCells = result.newPositions;
+        lastTween!.Finished += () => MovingAnimationFinished?.Invoke(result.pointsToAdd);
 
         AddNumber();
         
@@ -151,9 +154,10 @@ public partial class Board : Node2D
         return true;
     }
 
-    private Dictionary<CellPosition, Cell> CalculatePossibleMoves(MoveDirection moveDirection, List<KeyValuePair<CellPosition, Cell>> cellsToMove)
+    private (Dictionary<CellPosition, Cell> newPositions, int pointsToAdd) CalculateMoves(MoveDirection moveDirection, List<KeyValuePair<CellPosition, Cell>> cellsToMove)
     {
         var result = new Dictionary<CellPosition, Cell>();
+        var pointsToAdd = 0;
 
         switch (moveDirection)
         {
@@ -181,7 +185,10 @@ public partial class Board : Node2D
                             }
                             else if (value.Value == cell.Value.Value)
                             {
-                                value.IncrementValueTo(value.Value * 2);
+                                int points = value.Value * 2;
+                                value.IncrementValueTo(points);
+                                pointsToAdd += points;
+                                
                                 _playingCells.Remove(cell.Key);
                                 cell.Value.QueueFree();
                             }
@@ -221,7 +228,10 @@ public partial class Board : Node2D
                             }
                             else if (value.Value == cell.Value.Value)
                             {
-                                value.IncrementValueTo(value.Value * 2);
+                                int points = value.Value * 2;
+                                value.IncrementValueTo(points);
+                                pointsToAdd += points;
+                                
                                 _playingCells.Remove(cell.Key);
                                 cell.Value.QueueFree();
                             }
@@ -261,7 +271,10 @@ public partial class Board : Node2D
                             }
                             else if (value.Value == cell.Value.Value)
                             {
-                                value.IncrementValueTo(value.Value * 2);
+                                int points = value.Value * 2;
+                                value.IncrementValueTo(points);
+                                pointsToAdd += points;
+
                                 _playingCells.Remove(cell.Key);
                                 cell.Value.QueueFree();
                             }
@@ -301,7 +314,10 @@ public partial class Board : Node2D
                             }
                             else if (value.Value == cell.Value.Value)
                             {
-                                value.IncrementValueTo(value.Value * 2);
+                                int points = value.Value * 2;
+                                value.IncrementValueTo(points);
+                                pointsToAdd += points;
+
                                 _playingCells.Remove(cell.Key);
                                 cell.Value.QueueFree();
                             }
@@ -321,7 +337,7 @@ public partial class Board : Node2D
                 throw new ArgumentOutOfRangeException(nameof(moveDirection), moveDirection, null);
         }
         
-        return result;
+        return (result, pointsToAdd);
     }
 
     public void CheckIfWin()

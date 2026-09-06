@@ -1,22 +1,32 @@
+using Empty.scripts;
 using Godot;
 
 public partial class GameManager : Node2D
 {
-    [Export] private Label _startLabel;
     [Export] private Board _board;
+    [Export] private ScoreUi _scoreBoard;
 
     private bool _waitingToStart = true;
     [Export] private bool _canListenToInput;
+
+    private int _points = 0;
+
+    private const string SavePath = "user://save.json";
+    private int _bestScore = 0;
     
     public override void _Ready()
     {
-        _startLabel = GetParent().GetNode<Label>("start_label");
         _board = GetParent().GetNode<Board>("board");
+        _scoreBoard = GetParent().GetNode<ScoreUi>("score_ui");
 
         _board.StartingAnimationFinished += HandleStartingAnimationFinished;
         _board.MovingAnimationFinished += HandleMovingAnimationFinished;
         _board.GameWon += HandleGameWon;
         _board.GameLost += HandleGameLost;
+        
+        RenderingServer.SetDefaultClearColor(Constants.BACKGROUND);
+        _bestScore = LoadBest();
+        _scoreBoard.UpdateBestScore(_bestScore);
     }
 
     public override void _ExitTree()
@@ -32,11 +42,8 @@ public partial class GameManager : Node2D
         if (Input.IsKeyPressed(Key.Enter) && _waitingToStart)
         {
             _waitingToStart = false;
-            
-            var tween = GetTree().CreateTween();
-            tween.TweenProperty(_startLabel, "modulate", new Color(1, 1, 1, 0), 0.2);
-            
             _board.AnimateStart();
+            _scoreBoard.AnimateStart();
         }
 
         if (_waitingToStart)
@@ -75,9 +82,16 @@ public partial class GameManager : Node2D
         StartGame();
     }
     
-    private void HandleMovingAnimationFinished()
+    private void HandleMovingAnimationFinished(int pointsToAdd)
     {
         _canListenToInput = true;
+
+        if (pointsToAdd > 0)
+        {
+            _points += pointsToAdd;
+            _scoreBoard.UpdatePoints(_points);
+        }
+        
         _board.CheckIfWin();
         _board.CheckIfNoMoreMoves();
     }
@@ -86,18 +100,61 @@ public partial class GameManager : Node2D
     {
         GD.Print("Game won");
         _canListenToInput = false;
+
+        CheckBestScore();
     }
 
     private void HandleGameLost()
     {
         GD.Print("Game lost");
         _canListenToInput = false;
+
+        CheckBestScore();
     }
 
     private void StartGame()
     {
         _board.SpawnStartingNumbers(2, 2);
         _canListenToInput = true;
+        _scoreBoard.UpdatePoints(_points);
+    }
+
+    private void SaveBest(int best)
+    {
+        var data = new Godot.Collections.Dictionary { { "best", best } };
+        using var file = FileAccess.Open(SavePath, FileAccess.ModeFlags.Write);
+        if (file == null)
+        {
+            GD.PrintErr($"Save failed: {FileAccess.GetOpenError()}");
+            return;
+        }
+        file.StoreString(Json.Stringify(data));
+    }
+
+    private int LoadBest()
+    {
+        if (!FileAccess.FileExists(SavePath))
+            return 0;
+
+        using var file = FileAccess.Open(SavePath, FileAccess.ModeFlags.Read);
+        if (file == null)
+            return 0;
+
+        var parsed = Json.ParseString(file.GetAsText());
+        if (parsed.VariantType != Variant.Type.Dictionary)
+            return 0;
+
+        return (int)parsed.AsGodotDictionary()["best"];
+    }
+
+    private void CheckBestScore()
+    {
+        if (_points <= _bestScore)
+            return;
+            
+        _bestScore = _points;
+        _scoreBoard.UpdateBestScore(_bestScore);
+        SaveBest(_bestScore);
     }
 }
 

@@ -22,7 +22,7 @@ public partial class Cell : Node2D
     public void Initialize()
     {
         _label.Text = string.Empty;
-        _sprite.SelfModulate = CellConstants.EMPTY;
+        _sprite.SelfModulate = Constants.EMPTY;
 
         this.Visible = false;
         this.Scale = Vector2.Zero;
@@ -38,7 +38,9 @@ public partial class Cell : Node2D
     public void SetValue(int value)
     {
         _label.Text = value.ToString();
-        _sprite.SelfModulate = CellConstants.NUMBERS_TO_COLORS[value];
+        _label.AddThemeFontSizeOverride("font_size", Constants.NUMBERS_TO_TEXT_SIZE[value]);
+        
+        _sprite.SelfModulate = Constants.NUMBERS_TO_COLORS[value];
         
         Empty = false;
     }
@@ -47,7 +49,9 @@ public partial class Cell : Node2D
     {
         this.Scale = Vector2.Zero;
         _label.Text = value.ToString();
-        _sprite.SelfModulate = CellConstants.NUMBERS_TO_COLORS[value];
+        _label.AddThemeFontSizeOverride("font_size", Constants.NUMBERS_TO_TEXT_SIZE[value]);
+        
+        _sprite.SelfModulate = Constants.NUMBERS_TO_COLORS[value];
         Empty = false;
         
         var tween = GetTree().CreateTween();

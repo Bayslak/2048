@@ -1,0 +1,61 @@
+[gd_scene format=3 uid="uid://d4fma6ttwylja"]
+
+[ext_resource type="Script" uid="uid://dlucmvt7f55gv" path="res://scripts/ScoreUi.cs" id="1_hoy1o"]
+
+[node name="score_ui" type="Control" unique_id=1258085289]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_hoy1o")
+
+[node name="h_title_container" type="HBoxContainer" parent="." unique_id=1324345325]
+layout_mode = 0
+offset_left = 200.0
+offset_top = 6.0
+offset_right = 304.0
+offset_bottom = 46.0
+alignment = 1
+
+[node name="2048_title" type="Label" parent="h_title_container" unique_id=1731745295]
+layout_mode = 2
+text = "2048"
+
+[node name="by_bay" type="Label" parent="h_title_container" unique_id=194558126]
+layout_mode = 2
+theme_override_font_sizes/font_size = 5
+text = "by Bay"
+
+[node name="v_container" type="VBoxContainer" parent="." unique_id=1985514449]
+layout_mode = 0
+offset_left = 199.0
+offset_top = 8.0
+offset_right = 303.0
+offset_bottom = 174.0
+alignment = 1
+
+[node name="start_game_label" type="Label" parent="v_container" unique_id=977419228]
+layout_mode = 2
+theme_override_font_sizes/font_size = 7
+text = "Press enter to start the game"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="v_points_container" type="VBoxContainer" parent="v_container" unique_id=1649382555]
+visible = false
+layout_mode = 2
+alignment = 1
+
+[node name="points" type="Label" parent="v_container/v_points_container" unique_id=1369623825]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "Score:"
+horizontal_alignment = 1
+
+[node name="best_points" type="Label" parent="v_container/v_points_container" unique_id=875663688]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "Best:"
+horizontal_alignment = 1
