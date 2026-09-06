@@ -5,6 +5,7 @@ public partial class Cell : Node2D
 {
     [Export] private Sprite2D _sprite;
     [Export] private Label _label;
+    public int Value => int.Parse(_label.Text);
 
     [Export] public bool Empty = true;
     private Vector2 _startingScale;

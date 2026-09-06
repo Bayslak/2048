@@ -6,6 +6,7 @@ public partial class GameManager : Node2D
     [Export] private Board _board;
 
     private bool _waitingToStart = true;
+    [Export] private bool _canListenToInput;
     
     public override void _Ready()
     {
@@ -13,11 +14,13 @@ public partial class GameManager : Node2D
         _board = GetParent().GetNode<Board>("board");
 
         _board.StartingAnimationFinished += HandleStartingAnimationFinished;
+        _board.MovingAnimationFinished += HandleMovingAnimationFinished;
     }
 
     public override void _ExitTree()
     {
         _board.StartingAnimationFinished -= HandleStartingAnimationFinished;
+        _board.MovingAnimationFinished -= HandleMovingAnimationFinished;
     }
 
     public override void _Process(double delta)
@@ -35,7 +38,7 @@ public partial class GameManager : Node2D
         if (_waitingToStart)
             return;
 
-        if(!_board.IsMoving)
+        if(_canListenToInput)
             HandleMovements();
     }
 
@@ -44,18 +47,26 @@ public partial class GameManager : Node2D
         if (Input.IsActionJustPressed("left"))
         {
             _board.Move(MoveDirection.Left);
+            _canListenToInput = false;
         } 
         else if (Input.IsActionJustPressed("right"))
         {
             _board.Move(MoveDirection.Right);
+            _canListenToInput = false;
         }
         else if (Input.IsActionJustPressed("up"))
         {
             _board.Move(MoveDirection.Up);
+            _canListenToInput = false;
         }
         else if (Input.IsActionJustPressed("down"))
         {
             _board.Move(MoveDirection.Down);
+            _canListenToInput = false;
+        }
+        else
+        {
+            _canListenToInput = true;
         }
     }
 
@@ -63,10 +74,16 @@ public partial class GameManager : Node2D
     {
         StartGame();
     }
+    
+    private void HandleMovingAnimationFinished()
+    {
+        _canListenToInput = true;
+    }
 
     private void StartGame()
     {
         _board.SpawnStartingNumbers(2, 2);
+        _canListenToInput = true;
     }
 }
 

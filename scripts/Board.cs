@@ -18,7 +18,7 @@ public partial class Board : Node2D
 
     private float _timeBetweenSpawns = 0.08f;
     public event Action StartingAnimationFinished;
-    public bool IsMoving = false;
+    public event Action MovingAnimationFinished;
 
     public override void _Ready()
     {
@@ -86,12 +86,12 @@ public partial class Board : Node2D
     public void SpawnStartingNumbers(int howMany, int value)
     {
         var random = new Random();
+        
         for (int i = 0; i < howMany; i++)
         {
-            var randomRow = random.Next(_rows);
-            var randomColumn = random.Next(_columns);
-            
-            SpawnNumber(new CellPosition(randomRow, randomColumn), value);
+            var possibleCells = _backgroundCells.Keys.Where(cp => !_playingCells.ContainsKey(cp)).ToList();
+            var randomCellPosition =  possibleCells[random.Next(0, possibleCells.Count)];
+            SpawnNumber(randomCellPosition, value);
         }
     }
 
@@ -112,22 +112,27 @@ public partial class Board : Node2D
 
     public void Move(MoveDirection moveDirection)
     {
-        IsMoving = true;
-        
         var cellsToMove = _playingCells.Where(c => !c.Value.Empty).ToList();
         
         // i need to understand next position for each cell that can move, if they can move
         var result = CalculatePossibleMoves(moveDirection, cellsToMove);
 
+        if (result.Count == 0)
+        {
+            MovingAnimationFinished?.Invoke();
+            return;
+        }
+        
+        Tween lastTween = null;
         foreach (var cell in result)
         {
             var tween = GetTree().CreateTween();
             tween.TweenProperty(cell.Value, "position", _backgroundCells[cell.Key].Position, 0.1f);
+            lastTween = tween;
         }
 
         _playingCells = result;
-
-        IsMoving = false;
+        lastTween!.Finished += () => MovingAnimationFinished?.Invoke();
     }
 
     private Dictionary<CellPosition, Cell> CalculatePossibleMoves(MoveDirection moveDirection, List<KeyValuePair<CellPosition, Cell>> cellsToMove)
@@ -152,9 +157,18 @@ public partial class Board : Node2D
 
                         if (value is { Empty: false })
                         {
-                            result.Add(new CellPosition(i - 1, cell.Key.Column), cell.Value);
-                            _playingCells.Remove(cell.Key);
-                            _playingCells.Add(new CellPosition(i - 1, cell.Key.Column), cell.Value);
+                            if (value.Value != cell.Value.Value)
+                            {
+                                result.Add(new CellPosition(i - 1, cell.Key.Column), cell.Value);
+                                _playingCells.Remove(cell.Key);
+                                _playingCells.Add(new CellPosition(i - 1, cell.Key.Column), cell.Value);
+                            }
+                            else if (value.Value == cell.Value.Value)
+                            {
+                                value.SetValue(value.Value * 2);
+                                _playingCells.Remove(cell.Key);
+                                cell.Value.QueueFree();
+                            }
                             break;
                         }
 
@@ -183,9 +197,18 @@ public partial class Board : Node2D
 
                         if (value is { Empty: false })
                         {
-                            result.Add(new CellPosition(i + 1, cell.Key.Column), cell.Value);
-                            _playingCells.Remove(cell.Key);
-                            _playingCells.Add(new CellPosition(i + 1, cell.Key.Column), cell.Value);
+                            if (value.Value != cell.Value.Value)
+                            {
+                                result.Add(new CellPosition(i + 1, cell.Key.Column), cell.Value);
+                                _playingCells.Remove(cell.Key);
+                                _playingCells.Add(new CellPosition(i + 1, cell.Key.Column), cell.Value);
+                            }
+                            else if (value.Value == cell.Value.Value)
+                            {
+                                value.SetValue(value.Value * 2);
+                                _playingCells.Remove(cell.Key);
+                                cell.Value.QueueFree();
+                            }
                             break;
                         }
 
@@ -214,9 +237,18 @@ public partial class Board : Node2D
 
                         if (value is { Empty: false })
                         {
-                            result.Add(new CellPosition(cell.Key.Row, i + 1), cell.Value);
-                            _playingCells.Remove(cell.Key);
-                            _playingCells.Add(new CellPosition(cell.Key.Row, i + 1), cell.Value);
+                            if (value.Value != cell.Value.Value)
+                            {
+                                result.Add(new CellPosition(cell.Key.Row, i + 1), cell.Value);
+                                _playingCells.Remove(cell.Key);
+                                _playingCells.Add(new CellPosition(cell.Key.Row, i + 1), cell.Value);
+                            }
+                            else if (value.Value == cell.Value.Value)
+                            {
+                                value.SetValue(value.Value * 2);
+                                _playingCells.Remove(cell.Key);
+                                cell.Value.QueueFree();
+                            }
                             break;
                         }
 
@@ -245,9 +277,18 @@ public partial class Board : Node2D
 
                         if (value is { Empty: false })
                         {
-                            _playingCells.Remove(cell.Key);
-                            result.Add(new CellPosition(cell.Key.Row, i - 1), cell.Value);
-                            _playingCells.Add(new CellPosition(cell.Key.Row, i - 1), cell.Value);
+                            if (value.Value != cell.Value.Value)
+                            {
+                                result.Add(new CellPosition(cell.Key.Row, i - 1), cell.Value);
+                                _playingCells.Remove(cell.Key);
+                                _playingCells.Add(new CellPosition(cell.Key.Row, i - 1), cell.Value);
+                            }
+                            else if (value.Value == cell.Value.Value)
+                            {
+                                value.SetValue(value.Value * 2);
+                                _playingCells.Remove(cell.Key);
+                                cell.Value.QueueFree();
+                            }
                             break;
                         }
 
