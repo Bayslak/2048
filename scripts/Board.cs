@@ -95,6 +95,14 @@ public partial class Board : Node2D
         }
     }
 
+    private void AddNumber()
+    {
+        var numberRandomness = new Random().Next(0, 10);
+        var possibleCells = _backgroundCells.Keys.Where(cp => !_playingCells.ContainsKey(cp)).ToList();
+        var randomCellPosition = possibleCells[new Random().Next(0, possibleCells.Count)];
+        SpawnNumber(randomCellPosition, numberRandomness > 9 ? 4 : 2);
+    }
+
     private void SpawnNumber(CellPosition cellPosition, int value)
     {
         var cell = _cellScene.Instantiate<Cell>();
@@ -133,6 +141,8 @@ public partial class Board : Node2D
 
         _playingCells = result;
         lastTween!.Finished += () => MovingAnimationFinished?.Invoke();
+
+        AddNumber();
     }
 
     private Dictionary<CellPosition, Cell> CalculatePossibleMoves(MoveDirection moveDirection, List<KeyValuePair<CellPosition, Cell>> cellsToMove)
