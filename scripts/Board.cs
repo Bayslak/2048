@@ -118,19 +118,18 @@ public partial class Board : Node2D
         _playingCells.Add(cellPosition, cell);
     }
 
-    public void Move(MoveDirection moveDirection)
+    public bool Move(MoveDirection moveDirection)
     {
+        var cellsBefore = new Dictionary<CellPosition, Cell>(_playingCells);
+        
         var cellsToMove = _playingCells.Where(c => !c.Value.Empty).ToList();
         
         // i need to understand next position for each cell that can move, if they can move
         var result = CalculatePossibleMoves(moveDirection, cellsToMove);
 
-        if (result.Count == 0)
-        {
-            MovingAnimationFinished?.Invoke();
-            return;
-        }
-        
+        if (result.Count == 0 || !cellsBefore.Except(result).Any())
+            return false;
+
         Tween lastTween = null;
         foreach (var cell in result)
         {
@@ -143,6 +142,7 @@ public partial class Board : Node2D
         lastTween!.Finished += () => MovingAnimationFinished?.Invoke();
 
         AddNumber();
+        return true;
     }
 
     private Dictionary<CellPosition, Cell> CalculatePossibleMoves(MoveDirection moveDirection, List<KeyValuePair<CellPosition, Cell>> cellsToMove)

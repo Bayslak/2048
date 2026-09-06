@@ -46,27 +46,23 @@ public partial class GameManager : Node2D
     {
         if (Input.IsActionJustPressed("left"))
         {
-            _board.Move(MoveDirection.Left);
-            _canListenToInput = false;
+            if(_board.Move(MoveDirection.Left))
+                _canListenToInput = false;
         } 
         else if (Input.IsActionJustPressed("right"))
         {
-            _board.Move(MoveDirection.Right);
-            _canListenToInput = false;
+            if(_board.Move(MoveDirection.Right))
+                _canListenToInput = false;
         }
         else if (Input.IsActionJustPressed("up"))
         {
-            _board.Move(MoveDirection.Up);
-            _canListenToInput = false;
+            if(_board.Move(MoveDirection.Up))
+                _canListenToInput = false;
         }
         else if (Input.IsActionJustPressed("down"))
         {
-            _board.Move(MoveDirection.Down);
-            _canListenToInput = false;
-        }
-        else
-        {
-            _canListenToInput = true;
+            if(_board.Move(MoveDirection.Down))
+                _canListenToInput = false;
         }
     }
 
