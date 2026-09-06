@@ -10,6 +10,7 @@ public partial class ScoreUi : Control
     [Export] private Label _pointsLabel;
     [Export] private Label _bestScoreLabel;
     [Export] private Button _restartButton;
+    [Export] private Label _gameResultLabel;
     
     [Export] private Button _quitButton;
     
@@ -23,6 +24,7 @@ public partial class ScoreUi : Control
         _pointsContainer = GetNode<VBoxContainer>("v_container/v_points_container");
         _pointsLabel = GetNode<Label>("v_container/v_points_container/h_points_container/points");
         _bestScoreLabel = GetNode<Label>("v_container/v_points_container/h_best_points_container/best_points");
+        _gameResultLabel = GetNode<Label>("v_container/v_points_container/game_result");
         
         _restartButton = GetNode<Button>("v_container/v_points_container/try_again_b");
         _restartButton.Pressed += HandleRestartButtonPressed;
@@ -78,4 +80,19 @@ public partial class ScoreUi : Control
     }
 
     public void UpdateBestScore(int bestScore) => _bestScoreLabel.Text  = bestScore.ToString();
+
+    public void UpdateGameResultLabel(string label)
+    {
+        _gameResultLabel.Text = label;
+        _gameResultLabel.Visible = true;
+    }
+
+    public void ResetGameResult()
+    {
+        if (!_gameResultLabel.Visible)
+            return;
+        
+        _gameResultLabel.Text = string.Empty;
+        _gameResultLabel.Visible = false;
+    }
 }

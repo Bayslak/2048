@@ -100,7 +100,7 @@ public partial class GameManager : Node2D
 
     private void HandleGameWon()
     {
-        GD.Print("Game won");
+        _scoreBoard.UpdateGameResultLabel("Game won!");
         _canListenToInput = false;
 
         CheckBestScore();
@@ -108,7 +108,7 @@ public partial class GameManager : Node2D
 
     private void HandleGameLost()
     {
-        GD.Print("Game lost");
+        _scoreBoard.UpdateGameResultLabel("Game lost!");
         _canListenToInput = false;
 
         CheckBestScore();
@@ -132,6 +132,7 @@ public partial class GameManager : Node2D
         
         _points = 0;
         _scoreBoard.UpdatePoints(_points);
+        _scoreBoard.ResetGameResult();
     }
 
     #region SAVE
