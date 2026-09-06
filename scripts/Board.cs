@@ -144,6 +144,10 @@ public partial class Board : Node2D
         lastTween!.Finished += () => MovingAnimationFinished?.Invoke();
 
         AddNumber();
+        
+        foreach (var cell in _playingCells.Values)
+            cell.ResetUppedProperty();
+        
         return true;
     }
 
@@ -169,7 +173,7 @@ public partial class Board : Node2D
 
                         if (value is { Empty: false })
                         {
-                            if (value.Value != cell.Value.Value)
+                            if (value.Value != cell.Value.Value || value.HasAlreadyBeenUpped)
                             {
                                 result.Add(new CellPosition(i - 1, cell.Key.Column), cell.Value);
                                 _playingCells.Remove(cell.Key);
@@ -177,7 +181,7 @@ public partial class Board : Node2D
                             }
                             else if (value.Value == cell.Value.Value)
                             {
-                                value.SetValue(value.Value * 2);
+                                value.IncrementValueTo(value.Value * 2);
                                 _playingCells.Remove(cell.Key);
                                 cell.Value.QueueFree();
                             }
@@ -209,7 +213,7 @@ public partial class Board : Node2D
 
                         if (value is { Empty: false })
                         {
-                            if (value.Value != cell.Value.Value)
+                            if (value.Value != cell.Value.Value || value.HasAlreadyBeenUpped)
                             {
                                 result.Add(new CellPosition(i + 1, cell.Key.Column), cell.Value);
                                 _playingCells.Remove(cell.Key);
@@ -217,7 +221,7 @@ public partial class Board : Node2D
                             }
                             else if (value.Value == cell.Value.Value)
                             {
-                                value.SetValue(value.Value * 2);
+                                value.IncrementValueTo(value.Value * 2);
                                 _playingCells.Remove(cell.Key);
                                 cell.Value.QueueFree();
                             }
@@ -249,7 +253,7 @@ public partial class Board : Node2D
 
                         if (value is { Empty: false })
                         {
-                            if (value.Value != cell.Value.Value)
+                            if (value.Value != cell.Value.Value || value.HasAlreadyBeenUpped)
                             {
                                 result.Add(new CellPosition(cell.Key.Row, i + 1), cell.Value);
                                 _playingCells.Remove(cell.Key);
@@ -257,7 +261,7 @@ public partial class Board : Node2D
                             }
                             else if (value.Value == cell.Value.Value)
                             {
-                                value.SetValue(value.Value * 2);
+                                value.IncrementValueTo(value.Value * 2);
                                 _playingCells.Remove(cell.Key);
                                 cell.Value.QueueFree();
                             }
@@ -289,7 +293,7 @@ public partial class Board : Node2D
 
                         if (value is { Empty: false })
                         {
-                            if (value.Value != cell.Value.Value)
+                            if (value.Value != cell.Value.Value || value.HasAlreadyBeenUpped)
                             {
                                 result.Add(new CellPosition(cell.Key.Row, i - 1), cell.Value);
                                 _playingCells.Remove(cell.Key);
@@ -297,7 +301,7 @@ public partial class Board : Node2D
                             }
                             else if (value.Value == cell.Value.Value)
                             {
-                                value.SetValue(value.Value * 2);
+                                value.IncrementValueTo(value.Value * 2);
                                 _playingCells.Remove(cell.Key);
                                 cell.Value.QueueFree();
                             }
