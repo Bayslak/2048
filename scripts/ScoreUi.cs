@@ -1,3 +1,4 @@
+using System;
 using Godot;
 
 public partial class ScoreUi : Control
@@ -8,6 +9,11 @@ public partial class ScoreUi : Control
     [Export] private VBoxContainer _pointsContainer;
     [Export] private Label _pointsLabel;
     [Export] private Label _bestScoreLabel;
+    [Export] private Button _restartButton;
+    
+    [Export] private Button _quitButton;
+    
+    public event Action RestartButtonPressed;
 
     public override void _Ready()
     {
@@ -17,6 +23,29 @@ public partial class ScoreUi : Control
         _pointsContainer = GetNode<VBoxContainer>("v_container/v_points_container");
         _pointsLabel = GetNode<Label>("v_container/v_points_container/points");
         _bestScoreLabel = GetNode<Label>("v_container/v_points_container/best_points");
+        
+        _restartButton = GetNode<Button>("v_container/v_points_container/try_again_b");
+        _restartButton.Pressed += HandleRestartButtonPressed;
+
+        _quitButton = GetNode<Button>("quit_b");
+        _quitButton.Pressed += HandleQuitButtonPressed;
+    }
+
+    public override void _ExitTree()
+    {
+        _restartButton.Pressed -= HandleRestartButtonPressed;
+        _quitButton.Pressed -= HandleQuitButtonPressed;
+    }
+
+    private void HandleQuitButtonPressed()
+    {
+        GetTree().Quit();
+    }
+
+    private void HandleRestartButtonPressed()
+    {
+        RestartButtonPressed?.Invoke();
+        _restartButton.ReleaseFocus();
     }
 
     public void AnimateStart()

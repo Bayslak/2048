@@ -372,4 +372,12 @@ public partial class Board : Node2D
         }
         return false;
     }
+
+    public void Reset()
+    {
+        foreach (var cell in _playingCells)
+            cell.Value.QueueFree();
+        
+        _playingCells.Clear();
+    }
 }

@@ -25,8 +25,8 @@ public partial class GameManager : Node2D
         _board.GameLost += HandleGameLost;
         
         RenderingServer.SetDefaultClearColor(Constants.BACKGROUND);
-        _bestScore = LoadBest();
-        _scoreBoard.UpdateBestScore(_bestScore);
+
+        _scoreBoard.RestartButtonPressed += HandleRestartEvent;
     }
 
     public override void _ExitTree()
@@ -35,6 +35,8 @@ public partial class GameManager : Node2D
         _board.MovingAnimationFinished -= HandleMovingAnimationFinished;
         _board.GameWon -= HandleGameWon;
         _board.GameLost -= HandleGameLost;
+        
+        _scoreBoard.RestartButtonPressed -= HandleRestartEvent;
     }
 
     public override void _Process(double delta)
@@ -114,11 +116,26 @@ public partial class GameManager : Node2D
 
     private void StartGame()
     {
+        _bestScore = LoadBest();
+        _scoreBoard.UpdateBestScore(_bestScore);
+        
         _board.SpawnStartingNumbers(2, 2);
         _canListenToInput = true;
         _scoreBoard.UpdatePoints(_points);
     }
 
+    private void HandleRestartEvent()
+    {
+        _board.Reset();
+        _board.SpawnStartingNumbers(2, 2);
+        _canListenToInput = true;
+        
+        _points = 0;
+        _scoreBoard.UpdatePoints(_points);
+    }
+
+    #region SAVE
+    
     private void SaveBest(int best)
     {
         var data = new Godot.Collections.Dictionary { { "best", best } };
@@ -156,6 +173,8 @@ public partial class GameManager : Node2D
         _scoreBoard.UpdateBestScore(_bestScore);
         SaveBest(_bestScore);
     }
+    
+    #endregion
 }
 
 public enum MoveDirection
