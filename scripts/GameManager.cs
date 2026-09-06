@@ -15,12 +15,16 @@ public partial class GameManager : Node2D
 
         _board.StartingAnimationFinished += HandleStartingAnimationFinished;
         _board.MovingAnimationFinished += HandleMovingAnimationFinished;
+        _board.GameWon += HandleGameWon;
+        _board.GameLost += HandleGameLost;
     }
 
     public override void _ExitTree()
     {
         _board.StartingAnimationFinished -= HandleStartingAnimationFinished;
         _board.MovingAnimationFinished -= HandleMovingAnimationFinished;
+        _board.GameWon -= HandleGameWon;
+        _board.GameLost -= HandleGameLost;
     }
 
     public override void _Process(double delta)
@@ -74,6 +78,20 @@ public partial class GameManager : Node2D
     private void HandleMovingAnimationFinished()
     {
         _canListenToInput = true;
+        _board.CheckIfWin();
+        _board.CheckIfNoMoreMoves();
+    }
+
+    private void HandleGameWon()
+    {
+        GD.Print("Game won");
+        _canListenToInput = false;
+    }
+
+    private void HandleGameLost()
+    {
+        GD.Print("Game lost");
+        _canListenToInput = false;
     }
 
     private void StartGame()

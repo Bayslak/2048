@@ -19,6 +19,8 @@ public partial class Board : Node2D
     private float _timeBetweenSpawns = 0.08f;
     public event Action StartingAnimationFinished;
     public event Action MovingAnimationFinished;
+    public event Action GameWon;
+    public event Action GameLost;
 
     public override void _Ready()
     {
@@ -316,5 +318,38 @@ public partial class Board : Node2D
         }
         
         return result;
+    }
+
+    public void CheckIfWin()
+    {
+        bool isWon = _playingCells.Values.Any(c => c.Value == 2048);
+        if (isWon)
+            GameWon?.Invoke();
+    }
+
+    public void CheckIfNoMoreMoves()
+    {
+        bool boardFull = _playingCells.Count == 16
+            && _playingCells.Values.All(c => !c.Empty);
+
+        if (!boardFull)
+            return;
+
+        if (!AnyAdjacentMergePossible())
+            GameLost?.Invoke();
+    }
+
+    private bool AnyAdjacentMergePossible()
+    {
+        foreach (var (pos, cell) in _playingCells)
+        {
+            int value = cell.Value;
+
+            if (_playingCells.TryGetValue(new CellPosition(pos.Row, pos.Column + 1), out var rightVal) && rightVal.Value == value)
+                return true;
+            if (_playingCells.TryGetValue(new CellPosition(pos.Row - 1, pos.Column), out var downVal) && downVal.Value == value)
+                return true;
+        }
+        return false;
     }
 }
