@@ -48,16 +48,36 @@ visible = false
 layout_mode = 2
 alignment = 1
 
-[node name="points" type="Label" parent="v_container/v_points_container" unique_id=1369623825]
+[node name="h_points_container" type="HBoxContainer" parent="v_container/v_points_container" unique_id=1513621964]
+layout_mode = 2
+alignment = 1
+
+[node name="points_label" type="Label" parent="v_container/v_points_container/h_points_container" unique_id=1369623825]
 layout_mode = 2
 theme_override_font_sizes/font_size = 10
 text = "Score:"
 horizontal_alignment = 1
 
-[node name="best_points" type="Label" parent="v_container/v_points_container" unique_id=875663688]
+[node name="points" type="Label" parent="v_container/v_points_container/h_points_container" unique_id=581921964]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "0"
+horizontal_alignment = 1
+
+[node name="h_best_points_container" type="HBoxContainer" parent="v_container/v_points_container" unique_id=24462292]
+layout_mode = 2
+alignment = 1
+
+[node name="best_points_label" type="Label" parent="v_container/v_points_container/h_best_points_container" unique_id=875663688]
 layout_mode = 2
 theme_override_font_sizes/font_size = 10
 text = "Best:"
+horizontal_alignment = 1
+
+[node name="best_points" type="Label" parent="v_container/v_points_container/h_best_points_container" unique_id=143894723]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "0"
 horizontal_alignment = 1
 
 [node name="try_again_b" type="Button" parent="v_container/v_points_container" unique_id=2038118768]

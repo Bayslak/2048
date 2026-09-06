@@ -21,8 +21,8 @@ public partial class ScoreUi : Control
         _startingLabel = GetNode<Label>("v_container/start_game_label");
         
         _pointsContainer = GetNode<VBoxContainer>("v_container/v_points_container");
-        _pointsLabel = GetNode<Label>("v_container/v_points_container/points");
-        _bestScoreLabel = GetNode<Label>("v_container/v_points_container/best_points");
+        _pointsLabel = GetNode<Label>("v_container/v_points_container/h_points_container/points");
+        _bestScoreLabel = GetNode<Label>("v_container/v_points_container/h_best_points_container/best_points");
         
         _restartButton = GetNode<Button>("v_container/v_points_container/try_again_b");
         _restartButton.Pressed += HandleRestartButtonPressed;
@@ -66,7 +66,16 @@ public partial class ScoreUi : Control
         tween.TweenProperty(startingLabel, "visible", false, 0.1f);
     }
 
-    public void UpdatePoints(int points) => _pointsLabel.Text = $"Score: " + points;
+    public void UpdatePoints(int points)
+    {
+        _pointsLabel.Text = points.ToString();
 
-    public void UpdateBestScore(int bestScore) => _bestScoreLabel.Text  = $"Best: {bestScore}";
+        _pointsLabel.PivotOffset = _pointsLabel.Size / 2f;
+
+        var tween = GetTree().CreateTween();
+        tween.TweenProperty(_pointsLabel, "scale", new Vector2(1.2f, 1.2f), 0.1f);
+        tween.TweenProperty(_pointsLabel, "scale", Vector2.One, 0.1f);
+    }
+
+    public void UpdateBestScore(int bestScore) => _bestScoreLabel.Text  = bestScore.ToString();
 }
